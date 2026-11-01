@@ -1,5 +1,7 @@
 package com.aarish.minimalwidgets
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import android.content.Context
 import android.widget.RemoteViews
 import androidx.glance.GlanceId
@@ -21,12 +23,10 @@ import kotlinx.coroutines.flow.first
 class ClockWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val accent = AccentStore(context).accent.first()
-        val views = RemoteViews(context.packageName, R.layout.widget_clock).apply {
-            setTextColor(R.id.time, accent)
-        }
-        // TextClock runs in the launcher process and keeps time without minute polling.
         provideContent {
-            AndroidRemoteViews(views, modifier = GlanceModifier.clickable(actionStartActivity<MainActivity>()))
+            val savedAccent by AccentStore(context).accent.collectAsState(initial = accent)
+            val views = RemoteViews(context.packageName, R.layout.widget_clock).apply { setTextColor(R.id.time, savedAccent) }
+            AndroidRemoteViews(views, modifier = GlanceModifier.clickable(actionStartActivity(android.content.Intent(context, MainActivity::class.java))))
         }
     }
 }
@@ -36,7 +36,7 @@ class ClockWidgetReceiver : GlanceAppWidgetReceiver() {
 class AccentRefreshWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result = try {
         ClockWidget().updateAll(applicationContext)
-        listOf(PhotoWidget(), FolderWidget(), VolumeWidget(), WifiWidget(), DataWidget(), NoteWidget()).forEach { it.updateAll(applicationContext) }
+        refreshExtraWidgets(applicationContext)
         Result.success()
     } catch (cancelled: kotlinx.coroutines.CancellationException) {
         throw cancelled
@@ -51,3 +51,4 @@ class AccentRefreshWorker(context: Context, params: WorkerParameters) : Coroutin
         }
     }
 }
+
