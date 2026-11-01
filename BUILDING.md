@@ -17,7 +17,7 @@ Clock/date uses live TextClock views inside Glance and respects 12/24-hour prefe
 The grid uses equal 218dp cards and 130dp previews. Suggested widget size is 3 x 2; launcher grids vary and all widgets resize. Appearance changes are saved in DataStore and refresh every widget provider through WorkManager. Active sessions observe accent changes. Photos keep their natural colors.
 
 ## Validation
-The current application and instrumentation-test APKs compile locally. Instrumentation tests have been compiled, not executed. Hardware emulator acceleration is unavailable; software-mode startup has not produced a connected device. Local lint analysis ran, but its report writer hit a filesystem restriction. GitHub Actions independently runs APK compilation, test-APK compilation and lint; check its latest run for the result.
+The current application and instrumentation-test APKs compile locally. Instrumentation tests have been compiled, not executed. Hardware emulator acceleration is unavailable; software-mode startup has not produced a connected device. Local lint analysis ran, but its report writer hit a filesystem restriction. GitHub Actions run 41310619456 passed APK compilation, test-APK compilation and lint. Device acceptance checks below remain pending.
 
 ## Device checks before closing issues
 1. Launch into gallery; verify equal cards on small screens and at large font scale.
@@ -27,3 +27,4 @@ The current application and instrumentation-test APKs compile locally. Instrumen
 5. Configure two photos/folders/notes independently, edit again and cancel; verify saved values survive restart.
 6. Test volume, fixed-volume devices, app launching and Wi-Fi/data navigation.
 7. Remove configured widgets and verify remaining instances still work.
+
