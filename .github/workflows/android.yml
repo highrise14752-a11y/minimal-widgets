@@ -3,7 +3,7 @@ on:
   push:
   pull_request:
 concurrency:
-  group: android-${{ github.ref }}
+  group: android-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 permissions:
   contents: read
@@ -48,7 +48,7 @@ jobs:
           disable-animations: true
           script: |
             bash ./gradlew :app:connectedDebugAndroidTest
-            adb pull /sdcard/Android/data/com.aarish.minimalwidgets/files/screenshots screenshots
+            adb pull /sdcard/minimal-widgets-screenshots screenshots
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -57,4 +57,5 @@ jobs:
             app/build/reports/androidTests
             app/build/outputs/androidTest-results
             screenshots
+
 
