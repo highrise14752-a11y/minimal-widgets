@@ -51,7 +51,9 @@ class GalleryTest {
             val directory=File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null),"screenshots").apply{mkdirs()}
             val imageFile=File(directory,"$name.png")
             val instrumentation=InstrumentationRegistry.getInstrumentation()
+            compose.runOnIdle { compose.activity.window.decorView.invalidate() }
             instrumentation.waitForIdleSync()
+            instrumentation.uiAutomation.waitForIdle(250,5000)
             val screenshot=checkNotNull(instrumentation.uiAutomation.takeScreenshot())
             imageFile.outputStream().use { screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it) }
             screenshot.recycle()
@@ -98,6 +100,7 @@ class GalleryTest {
         } finally {runBlocking{store.update{old}}}
     }
 }
+
 
 
 
