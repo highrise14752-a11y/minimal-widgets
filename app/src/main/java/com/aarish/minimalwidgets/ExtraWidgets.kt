@@ -29,11 +29,11 @@ fun configIntent(context: Context, id: Int, kind: WidgetKind) = Intent(context, 
 open class ExtraWidget(private val kind: WidgetKind) : GlanceAppWidget() {
     override val stateDefinition = androidx.glance.state.PreferencesGlanceStateDefinition
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val accent = AccentStore(context).accent.first()
+        val initialAppearance = AccentStore(context).appearance.first()
         val widgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
         provideContent {
-            val savedAccent by AccentStore(context).accent.collectAsState(initial = accent)
-            val accent = savedAccent
+            val appearance by AccentStore(context).appearance.collectAsState(initial = initialAppearance)
+            val accent = appearance.accent
             val revision = currentState<Preferences>()[refreshKey] ?: 0L
         val prefs = widgetPrefs(context)
         val note = prefs.getString("note-$widgetId", "Tap to write a note").orEmpty()
@@ -44,7 +44,7 @@ open class ExtraWidget(private val kind: WidgetKind) : GlanceAppWidget() {
         val volume = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
         val max = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(1)
 
-            Column(GlanceModifier.fillMaxSize().background(Color(0xFF191919)).padding(12.dp),
+            Column(GlanceModifier.fillMaxSize().background(Color(appearance.background)).padding(12.dp),
                 verticalAlignment = Alignment.Vertical.CenterVertically,
                 horizontalAlignment = Alignment.Horizontal.CenterHorizontally) {
                 when (kind) {
@@ -134,3 +134,4 @@ open class CleanWidgetReceiver : GlanceAppWidgetReceiver() {
         super.onDeleted(context, appWidgetIds)
     }
 }
+

@@ -22,10 +22,10 @@ import kotlinx.coroutines.flow.first
 
 class ClockWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val accent = AccentStore(context).accent.first()
+        val initialAppearance = AccentStore(context).appearance.first()
         provideContent {
-            val savedAccent by AccentStore(context).accent.collectAsState(initial = accent)
-            val views = RemoteViews(context.packageName, R.layout.widget_clock).apply { setTextColor(R.id.time, savedAccent) }
+            val appearance by AccentStore(context).appearance.collectAsState(initial = initialAppearance)
+            val views = RemoteViews(context.packageName, R.layout.widget_clock).apply { setTextColor(R.id.time, appearance.accent); setTextColor(R.id.date, appearance.textColor()); setInt(R.id.widget_root, "setBackgroundColor", appearance.background) }
             AndroidRemoteViews(views, modifier = GlanceModifier.clickable(actionStartActivity(android.content.Intent(context, MainActivity::class.java))))
         }
     }
@@ -36,6 +36,7 @@ class ClockWidgetReceiver : GlanceAppWidgetReceiver() {
 class AccentRefreshWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result = try {
         ClockWidget().updateAll(applicationContext)
+        refreshBatteryWidgets(applicationContext)
         refreshExtraWidgets(applicationContext)
         Result.success()
     } catch (cancelled: kotlinx.coroutines.CancellationException) {
@@ -51,4 +52,7 @@ class AccentRefreshWorker(context: Context, params: WorkerParameters) : Coroutin
         }
     }
 }
+
+
+
 

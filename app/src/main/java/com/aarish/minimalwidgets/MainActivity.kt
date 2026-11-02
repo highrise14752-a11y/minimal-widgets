@@ -14,14 +14,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val store = AccentStore(applicationContext)
+        val store=AccentStore(applicationContext)
         setContent {
-            val accent by store.accent.collectAsStateWithLifecycle(initialValue = AccentStore.DEFAULT)
-            MaterialTheme(colorScheme = darkColorScheme(primary = Color(accent), background = Color.Black, surface = Color(0xFF191919))) {
-                HomeScreen(accent) { color ->
-                    store.save(color)
-                    AccentRefreshWorker.enqueue(applicationContext)
-                }
+            val appearance by store.appearance.collectAsStateWithLifecycle(initialValue=Appearance())
+            MaterialTheme(colorScheme=darkColorScheme(primary=Color(appearance.accent),onPrimary=Color.Black,background=Color.Black,surface=Color(0xFF19191F))) {
+                HomeScreen(appearance) { transform -> store.update(transform);AccentRefreshWorker.enqueue(applicationContext) }
             }
         }
     }
