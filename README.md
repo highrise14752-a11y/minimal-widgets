@@ -8,7 +8,7 @@ The first screen is the widget gallery. It has eleven categories: Battery, Digit
 
 Every gallery card uses the same two-column dimensions: 236dp tall, with a 164dp preview area. Wide widget designs are scaled inside the same card. Contacts, Games, Productivity and Quick Settings carry the requested 1×1 size; Battery, clocks, folders, music, personalize and photos retain their individual native size labels. Launcher grids determine the final placed cell dimensions.
 
-Includes search within a category, persisted favorites, original code-drawn previews, 46 theme presets, editable background/secondary/accent colors, reactive text colors, a sizing preference, and validated JSON appearance backup export/import/share. Default accent: `#FFC000`. Saved appearance changes enqueue refreshes of placed widgets. Themes are available without a paywall.
+Includes search within a category, persisted favorites, original code-drawn previews, 49 theme presets, editable background/secondary/accent colors, reactive text colors, a sizing preference, and validated JSON appearance backup export/import/share. Default accent: `#FFC000`. Saved appearance changes enqueue refreshes of placed widgets. Themes are available without a paywall.
 
 ## Working widgets and preview designs
 
@@ -30,3 +30,4 @@ bash ./gradlew :app:connectedDebugAndroidTest
 ```
 
 On Windows use `gradlew.bat`. See [BUILDING.md](BUILDING.md) for device checks and current limitations. GitHub Actions builds and lints the app, then separately boots an Android 10 emulator, runs instrumentation tests and uploads test reports/screenshots. Check the current branch's Actions result before assuming those device checks passed.
+
