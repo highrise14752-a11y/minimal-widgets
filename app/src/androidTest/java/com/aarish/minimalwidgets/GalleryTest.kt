@@ -3,7 +3,6 @@ package com.aarish.minimalwidgets
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File
 import kotlinx.coroutines.runBlocking
@@ -51,7 +50,11 @@ class GalleryTest {
             compose.waitForIdle()
             val directory=File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null),"screenshots").apply{mkdirs()}
             val imageFile=File(directory,"$name.png")
-            imageFile.outputStream().use { compose.onRoot().captureToImage().asAndroidBitmap().compress(android.graphics.Bitmap.CompressFormat.PNG,100,it) }
+            val instrumentation=InstrumentationRegistry.getInstrumentation()
+            instrumentation.waitForIdleSync()
+            val screenshot=checkNotNull(instrumentation.uiAutomation.takeScreenshot())
+            imageFile.outputStream().use { screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it) }
+            screenshot.recycle()
             // UTP may uninstall the target after the suite. Preserve artifacts in shell-owned storage.
             fun shell(command:String):String {
                 val descriptor=InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
@@ -95,6 +98,7 @@ class GalleryTest {
         } finally {runBlocking{store.update{old}}}
     }
 }
+
 
 
 
