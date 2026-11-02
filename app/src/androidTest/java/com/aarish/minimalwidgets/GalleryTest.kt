@@ -23,7 +23,7 @@ class GalleryTest {
         compose.onNodeWithText("Search widgets").performTextInput("no-such-widget")
         compose.onNodeWithText("No widgets found").assertIsDisplayed()
         compose.onNodeWithText("Search widgets").performTextReplacement("Battery Widget 1")
-        compose.onNodeWithText("Battery Widget 1",useUnmergedTree=true).assertIsDisplayed()
+        compose.onNodeWithContentDescription("Battery Widget 1, 2 × 2").assertIsDisplayed()
     }
     @Test fun compactPolicyAndEveryPreviewRenders() {
         assertEquals(11,galleryCategories.size)
@@ -85,4 +85,5 @@ class GalleryTest {
         } finally {runBlocking{store.update{old}}}
     }
 }
+
 
