@@ -50,7 +50,17 @@ class GalleryTest {
         fun capture(name:String) {
             compose.waitForIdle()
             val directory=File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null),"screenshots").apply{mkdirs()}
-            File(directory,"$name.png").outputStream().use { compose.onRoot().captureToImage().asAndroidBitmap().compress(android.graphics.Bitmap.CompressFormat.PNG,100,it) }
+            val imageFile=File(directory,"$name.png")
+            imageFile.outputStream().use { compose.onRoot().captureToImage().asAndroidBitmap().compress(android.graphics.Bitmap.CompressFormat.PNG,100,it) }
+            // UTP may uninstall the target after the suite. Preserve artifacts in shell-owned storage.
+            fun shell(command:String):String {
+                val descriptor=InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
+                return android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).bufferedReader().use{it.readText()}
+            }
+            val target="/sdcard/minimal-widgets-screenshots/$name.png"
+            shell("mkdir -p /sdcard/minimal-widgets-screenshots")
+            shell("cp ${imageFile.absolutePath} $target")
+            assertEquals(target,shell("ls $target").trim())
         }
         capture("battery")
         galleryCategories.drop(1).forEach { category ->
@@ -85,5 +95,8 @@ class GalleryTest {
         } finally {runBlocking{store.update{old}}}
     }
 }
+
+
+
 
 
