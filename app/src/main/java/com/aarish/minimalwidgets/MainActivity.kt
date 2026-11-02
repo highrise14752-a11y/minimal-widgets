@@ -13,7 +13,10 @@ import androidx.compose.runtime.getValue
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle=androidx.activity.SystemBarStyle.dark(android.graphics.Color.BLACK),
+            navigationBarStyle=androidx.activity.SystemBarStyle.dark(android.graphics.Color.BLACK)
+        )
         val store=AccentStore(applicationContext)
         setContent {
             val appearance by store.appearance.collectAsStateWithLifecycle(initialValue=Appearance())
@@ -23,3 +26,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
