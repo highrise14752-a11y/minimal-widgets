@@ -14,6 +14,13 @@ fun widgetDestinationActions(panel: String?): List<String> = when(panel) {
     "clock" -> listOf(AlarmClock.ACTION_SHOW_ALARMS, AlarmClock.ACTION_SHOW_TIMERS)
     "wifi" -> listOf(Settings.Panel.ACTION_WIFI, Settings.ACTION_WIFI_SETTINGS, Settings.ACTION_SETTINGS)
     "data" -> listOf(Settings.Panel.ACTION_INTERNET_CONNECTIVITY, Settings.ACTION_DATA_ROAMING_SETTINGS, Settings.ACTION_SETTINGS)
+    "bluetooth" -> listOf(Settings.ACTION_BLUETOOTH_SETTINGS, Settings.ACTION_WIRELESS_SETTINGS, Settings.ACTION_SETTINGS)
+    "airplane" -> listOf(Settings.ACTION_AIRPLANE_MODE_SETTINGS, Settings.ACTION_WIRELESS_SETTINGS, Settings.ACTION_SETTINGS)
+    "dark", "rotate" -> listOf(Settings.ACTION_DISPLAY_SETTINGS, Settings.ACTION_SETTINGS)
+    "dnd" -> listOf("android.settings.ZEN_MODE_SETTINGS", Settings.ACTION_SOUND_SETTINGS, Settings.ACTION_SETTINGS)
+    "hotspot" -> listOf("android.settings.TETHER_SETTINGS", Settings.ACTION_WIRELESS_SETTINGS, Settings.ACTION_SETTINGS)
+    "location" -> listOf(Settings.ACTION_LOCATION_SOURCE_SETTINGS, Settings.ACTION_SETTINGS)
+    "sound" -> listOf(Settings.ACTION_SOUND_SETTINGS, Settings.ACTION_SETTINGS)
     else -> listOf(Settings.Panel.ACTION_VOLUME, Settings.ACTION_SOUND_SETTINGS, Settings.ACTION_SETTINGS)
 }
 

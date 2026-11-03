@@ -37,5 +37,6 @@ fun Design.readyReceiver(): Class<*>? = when {
     category == "Quick Settings" && name == "Wi-Fi 2" -> WifiReceiver::class.java
     category == "Quick Settings" && name == "Mobile data 2" -> DataReceiver::class.java
     category == "Quick Settings" && name == "Sound 2" -> VolumeReceiver::class.java
+    category == "Quick Settings" -> QuickSettingsReceiver::class.java
     else -> null
 }

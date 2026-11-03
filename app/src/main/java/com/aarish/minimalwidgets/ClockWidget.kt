@@ -39,6 +39,7 @@ class AccentRefreshWorker(context: Context, params: WorkerParameters) : Coroutin
         refreshBatteryWidgets(applicationContext)
         refreshExtraWidgets(applicationContext)
         refreshContactWidgets(applicationContext)
+        refreshQuickWidgets(applicationContext)
         Result.success()
     } catch (cancelled: kotlinx.coroutines.CancellationException) {
         throw cancelled
