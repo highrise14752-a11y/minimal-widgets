@@ -21,7 +21,7 @@ The original clock uses live TextClock RemoteViews and respects system time form
 
 ## Scope still in progress
 
-PREVIEW cards intentionally cannot be pinned. They include most digital/hybrid variants, contacts, game engines, media-session integration, photo mask processing and productivity data sources. QR previews are decorative samples, not generated personal payment codes. No premium billing or links to the reference developer are included. Studio's sizing preference is stored for later provider expansion; it does not resize existing widgets.
+PREVIEW cards intentionally cannot be pinned. They include most digital/hybrid variants, additional contact layouts, game engines, full media-session integration, photo mask processing and productivity data sources. QR previews are decorative samples, not generated personal payment codes. No premium billing or links to the reference developer are included. Studio's sizing preference is stored for later provider expansion; it does not resize existing widgets.
 
 ## Validation
 
@@ -37,3 +37,9 @@ Both APK targets have compiled locally. This environment blocks ADB's normal And
 6. Configure two photos/folders/text widgets independently; edit, cancel and restart.
 7. Resize the quick-setting widgets to 1×1; verify panel navigation and volume controls on the device.
 8. Export a palette, change it, import the backup; malformed/unsupported backups must preserve existing settings.
+
+## Action acceptance
+
+Battery widgets open power-usage settings with OEM fallbacks; the live clock opens alarms with timers as a fallback. Three basic contact providers store a private name/number per instance. Set contact and Edit are separate from call/message actions. CALL_PHONE is requested only for direct calling; configuring a contact or granting permission does not place a call. No READ_CONTACTS permission is needed for the system phone-number picker. Removing a contact widget clears its saved number. Message actions open a composer. Music 10 dispatches a headset-style play/pause event to the current media consumer; other music designs remain previews.
+
+Action instrumentation intercepts battery/clock destinations, checks call/SMS intent construction, rejects injected telephone/USSD/post-dial data, and checks panel fallback order. It never places a real call. On a physical phone, verify two independently configured contact widgets, permission denial/revocation, direct call and message routing, deletion/re-add cleanup, the OEM battery screen, the chosen clock app, music playback with an active compatible player, and media volume buttons. These hardware/telephony checks are not replaced by emulator intent interception.

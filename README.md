@@ -16,9 +16,15 @@ Includes search within a category, persisted favorites, original code-drawn prev
 
 Existing live clock/date, basic photo, four-app folder, media volume, Wi-Fi settings, mobile-data settings and personal-text widgets remain available. Photo/folder/text cards explicitly describe the basic placed version. Tap a placed photo/folder/text widget to configure it. Wi-Fi and data open Android settings panels.
 
-**PREVIEW** cards show the requested design direction; most clock typography variants, contact actions, games, music control, photo masks and productivity providers still need implementation. They do not show a nonfunctional Add button. Photos and avatar previews use original procedural drawings; supplied artwork and proprietary fonts were not copied. Counts show the layouts actually included, rather than the reference app's larger catalog totals.
+**PREVIEW** cards show the requested design direction; most clock typography variants, additional contact layouts, games, full music layouts/media-session metadata, photo masks and productivity providers still need implementation. They do not show a nonfunctional Add button. Photos and avatar previews use original procedural drawings; supplied artwork and proprietary fonts were not copied. Counts show the layouts actually included, rather than the reference app's larger catalog totals.
 
 Studio's widget mode is a persisted preference only; it does not retroactively resize widgets or implement a new sizing engine. The 1×1 provider minima are enabled for the existing quick-setting providers, with launcher-dependent sizing.
+
+## Home-screen actions
+
+Battery taps open Android's battery usage screen (battery saver/general settings are OEM fallbacks). The live clock opens the clock app's alarms. Contact 1, Contact 11 and Contact 12 add basic per-instance call/message shortcuts: tap Set contact, enter a number or choose one from the system picker, and save. Direct calls use CALL_PHONE runtime permission and begin immediately on a subsequent widget tap, without opening the contacts app. Permission grants and saving configuration never place a call. Message actions open a composer; sending remains in the messaging app. Edit changes the saved contact. A compact 1x1 contact uses the name as its primary action; enlarge Contact 1 to show its second Message action.
+
+Music 10 is a real play/pause media button for Android's current media consumer, like a headset button. Start playback in a compatible music app first. This basic widget has no song/album metadata and cannot start an unconfigured player. Volume +/- changes the media stream; Settings opens Android's volume panel. Photo and text taps edit their content; app-folder entries launch their selected app. Only READY designs can be placed.
 
 ## Build and verification
 
