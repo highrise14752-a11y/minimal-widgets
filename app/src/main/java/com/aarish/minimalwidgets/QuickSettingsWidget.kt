@@ -213,6 +213,9 @@ class QuickActionActivity : ComponentActivity() {
         } } }
     }
     private suspend fun toggleTorch() {
+        if(checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            toast("Camera permission was revoked. Tap the torch widget again to allow it."); return
+        }
         val manager = getSystemService(CameraManager::class.java)
         val ids = manager.cameraIdList.filter { manager.getCameraCharacteristics(it).get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true }
         val id = ids.firstOrNull { manager.getCameraCharacteristics(it).get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK } ?: ids.firstOrNull()
