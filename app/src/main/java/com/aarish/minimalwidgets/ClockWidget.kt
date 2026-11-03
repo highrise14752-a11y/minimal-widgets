@@ -26,7 +26,7 @@ class ClockWidget : GlanceAppWidget() {
         provideContent {
             val appearance by AccentStore(context).appearance.collectAsState(initial = initialAppearance)
             val views = RemoteViews(context.packageName, R.layout.widget_clock).apply { setTextColor(R.id.time, appearance.accent); setTextColor(R.id.date, appearance.textColor()); setInt(R.id.widget_root, "setBackgroundColor", appearance.background) }
-            AndroidRemoteViews(views, modifier = GlanceModifier.clickable(actionStartActivity(android.content.Intent(context, MainActivity::class.java))))
+            AndroidRemoteViews(views, modifier = GlanceModifier.clickable(actionStartActivity(widgetDestination(context, "clock"))))
         }
     }
 }
@@ -38,6 +38,7 @@ class AccentRefreshWorker(context: Context, params: WorkerParameters) : Coroutin
         ClockWidget().updateAll(applicationContext)
         refreshBatteryWidgets(applicationContext)
         refreshExtraWidgets(applicationContext)
+        refreshContactWidgets(applicationContext)
         Result.success()
     } catch (cancelled: kotlinx.coroutines.CancellationException) {
         throw cancelled

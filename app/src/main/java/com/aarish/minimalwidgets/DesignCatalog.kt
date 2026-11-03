@@ -27,6 +27,10 @@ val designCatalog: List<Design> = buildList {
 fun Design.readyReceiver(): Class<*>? = when {
     category == "Battery" -> BatteryReceiver::class.java
     category == "Digital Clock" && style == 34 -> ClockWidgetReceiver::class.java
+    category == "Contacts" && style == 1 -> ContactReceiver::class.java
+    category == "Contacts" && style == 11 -> CallReceiver::class.java
+    category == "Contacts" && style == 12 -> MessageReceiver::class.java
+    category == "Music" && style == 10 -> MusicReceiver::class.java
     category == "Photo" && style == 36 -> PhotoReceiver::class.java
     category == "Folder Apps" && style == 1 -> FolderReceiver::class.java
     category == "Personalize" && style == 8 -> NoteReceiver::class.java

@@ -129,6 +129,7 @@ open class CleanWidgetReceiver : GlanceAppWidgetReceiver() {
         appWidgetIds.forEach { id ->
             File(context.filesDir, "photo-$id.jpg").delete()
             prefs.remove("note-$id").remove("apps-$id")
+                .remove("contact-name-$id").remove("contact-number-$id")
         }
         prefs.apply()
         super.onDeleted(context, appWidgetIds)

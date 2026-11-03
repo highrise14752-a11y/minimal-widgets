@@ -32,7 +32,7 @@ class BatteryWidget : GlanceAppWidget() {
             val charging=status==BatteryManager.BATTERY_STATUS_CHARGING || status==BatteryManager.BATTERY_STATUS_FULL
             val d=designCatalog.first{it.category=="Battery" && it.style==style}
             val bitmap=remember(appearance,revision,style){DesignRenderer.render(d,appearance,percent,charging)}
-            Image(ImageProvider(bitmap),if(percent>=0)"Battery $percent percent" else "Battery unavailable",modifier=GlanceModifier.fillMaxSize().clickable(actionStartActivity(Intent(context,MainActivity::class.java))),contentScale=ContentScale.Fit)
+            Image(ImageProvider(bitmap),if(percent>=0)"Battery $percent percent; open battery settings" else "Battery unavailable; open battery settings",modifier=GlanceModifier.fillMaxSize().clickable(actionStartActivity(widgetDestination(context,"battery"))),contentScale=ContentScale.Fit)
         }
     }
 }
