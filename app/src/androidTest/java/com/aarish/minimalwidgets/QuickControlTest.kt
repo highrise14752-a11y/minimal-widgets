@@ -58,6 +58,14 @@ class QuickControlTest {
         assertEquals(vibrate, nextRingerMode(QuickControl.VIBRATE, silent))
     }
 
+    @Test fun autoContrastUsesThePlacedFamilyBackgroundAndKeepsForcedColors() {
+        val appearance = Appearance(background = android.graphics.Color.WHITE, secondary = android.graphics.Color.BLACK, reactive = "Auto contrast")
+        assertEquals(android.graphics.Color.BLACK, quickControlTextColor(appearance, 1))
+        assertEquals(android.graphics.Color.WHITE, quickControlTextColor(appearance, 4))
+        assertEquals(android.graphics.Color.BLACK, quickControlTextColor(appearance.copy(reactive = "Always black"), 4))
+        assertEquals(appearance.background, quickControlTextColor(appearance.copy(reactive = "Background color"), 4))
+    }
+
     @Test fun instancesKeepIndependentSelectionsAndRejectUnownedPins() {
         val prefs = widgetPrefs(context)
         val ids = listOf(-70001, -70002)
