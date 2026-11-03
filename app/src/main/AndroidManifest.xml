@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+  <uses-permission android:name="android.permission.CALL_PHONE" />
   <queries>
     <intent>
       <action android:name="android.intent.action.MAIN" />
@@ -25,6 +26,24 @@
       <meta-data android:name="android.appwidget.provider" android:resource="@xml/clock_widget_info" />
     </receiver>
     <activity android:name=".SettingsActivity" android:exported="false" />
+    <activity android:name=".ContactActionActivity" android:exported="false" android:excludeFromRecents="true" />
+    <activity android:name=".ContactConfigActivity" android:exported="false" />
+    <receiver android:name=".ContactReceiver" android:exported="true" android:label="Contact call and message">
+      <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/contact_widget_info" />
+    </receiver>
+    <receiver android:name=".CallReceiver" android:exported="true" android:label="Direct call">
+      <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/contact_widget_info" />
+    </receiver>
+    <receiver android:name=".MessageReceiver" android:exported="true" android:label="Message contact">
+      <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/contact_widget_info" />
+    </receiver>
+    <receiver android:name=".MusicReceiver" android:exported="true" android:label="Music play and pause">
+      <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/contact_widget_info" />
+    </receiver>
     <activity android:name=".WidgetConfigActivity" android:exported="false" />
     <receiver android:name=".PhotoReceiver" android:exported="true" android:label="Photo">
       <intent-filter>
