@@ -20,16 +20,20 @@ fun widgetDestinationActions(panel: String?): List<String> = when(panel) {
 fun widgetDestination(context: android.content.Context, panel: String) =
     Intent(context, SettingsActivity::class.java).putExtra("panel", panel)
 
+/** A launcher boundary keeps fallback behavior testable without launching external apps. */
+fun openWidgetDestination(panel: String?, launch: (Intent) -> Unit): Boolean {
+    for (action in widgetDestinationActions(panel)) {
+        try { launch(Intent(action)); return true }
+        catch (_: ActivityNotFoundException) { /* Try the OEM fallback. */ }
+        catch (_: SecurityException) { /* Some OEM screens require a privileged permission. */ }
+    }
+    return false
+}
+
 class SettingsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val actions = widgetDestinationActions(intent.getStringExtra("panel"))
-        var opened = false
-        for (action in actions) {
-            try { startActivity(Intent(action)); opened = true; break }
-            catch (_: ActivityNotFoundException) { /* Try the OEM fallback. */ }
-            catch (_: SecurityException) { /* Some OEM screens require a privileged permission. */ }
-        }
+        val opened = openWidgetDestination(intent.getStringExtra("panel")) { startActivity(it) }
         if (!opened) Toast.makeText(this, "No app is available to open this widget action.", Toast.LENGTH_LONG).show()
         finish()
     }
