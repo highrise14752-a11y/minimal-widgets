@@ -56,6 +56,9 @@ enum class QuickControl(val label: String, val symbol: String, val panel: String
 }
 private val familyControls = QuickControl.entries.take(13)
 data class QuickDesign(val design: Design, val control: QuickControl, val family: Int)
+fun quickControlTextColor(appearance: Appearance, family: Int): Int =
+    if(family == 4 && appearance.reactive == "Auto contrast") appearance.copy(background = appearance.secondary).textColor()
+    else appearance.textColor()
 fun quickDesign(designId: String?): QuickDesign? {
     val design = designCatalog.find { it.id == designId && it.category == "Quick Settings" } ?: return null
     return when(design.style) {
@@ -93,8 +96,9 @@ class QuickSettingsWidget : GlanceAppWidget() {
             val selected = remember(revision) { savedQuickDesign(context, widgetId) }
             val compact = LocalSize.current.width < 120.dp || LocalSize.current.height < 100.dp
             val action = actionStartActivity(quickTapIntent(context, widgetId))
-            val iconColor = if(selected.family <= 3) appearance.accent else appearance.textColor()
             val background = if(selected.family == 4) appearance.secondary else appearance.background
+            val foreground = quickControlTextColor(appearance, selected.family)
+            val iconColor = if(selected.family <= 3) appearance.accent else foreground
             Column(GlanceModifier.fillMaxSize().background(Color(background)).clickable(action)
                 .semantics { contentDescription = "${selected.control.label}; ${if(selected.control.panel != null) "open settings" else "tap to change"}" }.padding(if(compact) 2.dp else 8.dp),
                 verticalAlignment = androidx.glance.layout.Alignment.Vertical.CenterVertically,
@@ -102,16 +106,16 @@ class QuickSettingsWidget : GlanceAppWidget() {
                 if(selected.family == 1 && !compact) Row(verticalAlignment = androidx.glance.layout.Alignment.Vertical.CenterVertically) {
                     Text(selected.control.symbol, style = TextStyle(color = ColorProvider(Color(iconColor)), fontSize = 32.sp))
                     Text(selected.control.label, GlanceModifier.padding(8.dp), maxLines = 2,
-                        style = TextStyle(color = ColorProvider(Color(appearance.textColor())), fontSize = 18.sp))
+                        style = TextStyle(color = ColorProvider(Color(foreground)), fontSize = 18.sp))
                 } else {
                     Text(if(selected.family == 3) selected.control.symbol else selected.control.label,
                         GlanceModifier.defaultWeight().padding(2.dp), maxLines = if(compact) 1 else 2,
                         style = TextStyle(color = ColorProvider(Color(iconColor)), fontSize = if(selected.family == 3) 26.sp else if(compact) 12.sp else 20.sp))
                     if(!compact && selected.family != 3) Text(if(selected.control.panel != null) "Open settings" else "Tap to change",
-                        style = TextStyle(color = ColorProvider(Color(appearance.textColor())), fontSize = 12.sp))
+                        style = TextStyle(color = ColorProvider(Color(foreground)), fontSize = 12.sp))
                 }
                 Text("Edit", GlanceModifier.clickable(actionStartActivity(quickTapIntent(context, widgetId, true))).padding(2.dp),
-                    style = TextStyle(color = ColorProvider(Color(appearance.textColor())), fontSize = 10.sp))
+                    style = TextStyle(color = ColorProvider(Color(foreground)), fontSize = 10.sp))
             }
         }
     }
