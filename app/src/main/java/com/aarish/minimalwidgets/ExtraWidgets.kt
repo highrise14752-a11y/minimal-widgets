@@ -40,11 +40,13 @@ open class ExtraWidget(private val kind: WidgetKind) : GlanceAppWidget() {
         val apps = prefs.getString("apps-$widgetId", "").orEmpty().split('|').filter { it.isNotEmpty() }
         val photo = remember(revision) { if (kind == WidgetKind.PHOTO) BitmapFactory.decodeFile(File(context.filesDir, "photo-$widgetId.jpg").path) else null }
         val edit = actionStartActivity(configIntent(context, widgetId, kind))
-        val audio = context.getSystemService(AudioManager::class.java)
-        val volume = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
-        val max = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(1)
+        val compact = LocalSize.current.width < 120.dp || LocalSize.current.height < 90.dp
+        val panel = when(kind) { WidgetKind.WIFI -> "wifi"; WidgetKind.DATA -> "data"; WidgetKind.VOLUME -> if(compact) "volume" else null; else -> null }
+        val surface = GlanceModifier.fillMaxSize().background(Color(appearance.background)).let {
+            if(panel != null) it.clickable(actionStartActivity(widgetDestination(context, panel))) else it
+        }
 
-            Column(GlanceModifier.fillMaxSize().background(Color(appearance.background)).padding(12.dp),
+            Column(surface.padding(if(compact) 2.dp else 12.dp),
                 verticalAlignment = Alignment.Vertical.CenterVertically,
                 horizontalAlignment = Alignment.Horizontal.CenterHorizontally) {
                 when (kind) {
@@ -67,24 +69,27 @@ open class ExtraWidget(private val kind: WidgetKind) : GlanceAppWidget() {
                         Text("Edit folder", modifier = GlanceModifier.clickable(edit).padding(4.dp), style = TextStyle(color = ColorProvider(Color.LightGray), fontSize = 12.sp))
                     }
                     WidgetKind.VOLUME -> {
+                        if (compact) Label("Volume", accent, actionStartActivity(widgetDestination(context, "volume")), true)
+                        else {
                         Text("Media volume", style = TextStyle(color = ColorProvider(Color(accent)), fontSize = 16.sp))
                         Row {
                             Label("−", accent, actionRunCallback<LowerVolume>())
                             Label("+", accent, actionRunCallback<RaiseVolume>())
                             Label("Settings", accent, actionStartActivity(Intent(context, SettingsActivity::class.java).putExtra("panel", "volume")))
                         }
+                        }
                     }
-                    WidgetKind.WIFI, WidgetKind.DATA -> Label(if (kind == WidgetKind.WIFI) "Wi-Fi settings" else "Mobile data settings", accent,
-                        actionStartActivity(Intent(context, SettingsActivity::class.java).putExtra("panel", if (kind == WidgetKind.WIFI) "wifi" else "data")))
+                    WidgetKind.WIFI, WidgetKind.DATA -> Label(if (kind == WidgetKind.WIFI) "Wi-Fi" else "Data", accent,
+                        actionStartActivity(widgetDestination(context, if (kind == WidgetKind.WIFI) "wifi" else "data")), compact)
                 }
             }
         }
     }
 }
 @Composable
-private fun Label(text: String, accent: Int, action: Action) {
-    Text(text, modifier = GlanceModifier.clickable(action).padding(6.dp), maxLines = 6,
-        style = TextStyle(color = ColorProvider(Color(accent)), fontSize = 18.sp))
+private fun Label(text: String, accent: Int, action: Action, compact: Boolean = false) {
+    Text(text, modifier = GlanceModifier.clickable(action).padding(if(compact) 2.dp else 6.dp), maxLines = if(compact) 1 else 6,
+        style = TextStyle(color = ColorProvider(Color(accent)), fontSize = if(compact) 12.sp else 18.sp))
 }
 class PhotoWidget : ExtraWidget(WidgetKind.PHOTO)
 class FolderWidget : ExtraWidget(WidgetKind.FOLDER)
