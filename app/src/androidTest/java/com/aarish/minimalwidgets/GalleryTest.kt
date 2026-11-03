@@ -36,7 +36,10 @@ class GalleryTest {
         val old=runBlocking{store.appearance.first()}
         try {
             runBlocking {store.update{it.copy(favorites=emptySet())}}
+            compose.waitForIdle()
             compose.onNodeWithContentDescription("Favorite Battery Widget 1").performClick()
+            compose.waitUntil(5000) { runBlocking { "battery-1" in store.appearance.first().favorites } }
+            compose.waitForIdle()
             compose.onNodeWithContentDescription("Favorites",useUnmergedTree=true).performClick()
             compose.onNodeWithText("Battery Widget 1").assertIsDisplayed()
             compose.onNodeWithContentDescription("Settings",useUnmergedTree=true).performClick()

@@ -1,12 +1,9 @@
 package com.aarish.minimalwidgets
 
-import android.app.Activity
-import android.app.Instrumentation
 import android.content.Intent
-import android.content.IntentFilter
+import android.content.ActivityNotFoundException
 import android.provider.AlarmClock
 import android.provider.Settings
-import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.*
@@ -18,17 +15,14 @@ class WidgetActionTest {
     @Test fun batteryTapRoutesToSystemPowerUsage() = interceptDestination("battery", Intent.ACTION_POWER_USAGE_SUMMARY)
     @Test fun clockTapRoutesToClockAlarms() = interceptDestination("clock", AlarmClock.ACTION_SHOW_ALARMS)
 
-    // Intercept external launches; tests never place calls or change system settings.
+    // Capture the external launch boundary; tests never open apps or place calls.
     private fun interceptDestination(panel: String, action: String) {
-        val instrumentation = InstrumentationRegistry.getInstrumentation()
-        val monitor = Instrumentation.ActivityMonitor(IntentFilter(action), Instrumentation.ActivityResult(Activity.RESULT_OK, Intent()), true)
-        instrumentation.addMonitor(monitor)
-        try {
-            ActivityScenario.launch<SettingsActivity>(widgetDestination(instrumentation.targetContext, panel)).use {
-                instrumentation.waitForIdleSync()
-                assertEquals(1, monitor.hits)
-            }
-        } finally { instrumentation.removeMonitor(monitor) }
+        val destination = widgetDestination(InstrumentationRegistry.getInstrumentation().targetContext, panel)
+        assertEquals(SettingsActivity::class.java.name, destination.component?.className)
+        assertEquals(panel, destination.getStringExtra("panel"))
+        val launched = mutableListOf<Intent>()
+        assertTrue(openWidgetDestination(panel) { launched.add(it) })
+        assertEquals(listOf(action), launched.map { it.action })
     }
 
     @Test fun directCallAndSmsHaveCorrectActionsAndNoInjectedUri() {
@@ -50,5 +44,12 @@ class WidgetActionTest {
         assertEquals(Settings.Panel.ACTION_INTERNET_CONNECTIVITY, widgetDestinationActions("data").first())
         assertEquals(Settings.Panel.ACTION_VOLUME, widgetDestinationActions("volume").first())
         assertEquals(Settings.ACTION_SETTINGS, widgetDestinationActions("battery").last())
+        val attempted = mutableListOf<String?>()
+        assertTrue(openWidgetDestination("battery") {
+            attempted.add(it.action)
+            if (it.action == Intent.ACTION_POWER_USAGE_SUMMARY) throw ActivityNotFoundException()
+        })
+        assertEquals(listOf(Intent.ACTION_POWER_USAGE_SUMMARY, Settings.ACTION_BATTERY_SAVER_SETTINGS), attempted)
+        assertFalse(openWidgetDestination("clock") { throw SecurityException("Unavailable OEM activity") })
     }
 }
