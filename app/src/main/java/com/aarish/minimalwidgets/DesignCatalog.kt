@@ -25,7 +25,13 @@ val designCatalog: List<Design> = buildList {
 
 /** Only connect designs to providers when their placed appearance and behavior exist. */
 fun Design.readyReceiver(): Class<*>? = when {
-    category == "Battery" -> BatteryReceiver::class.java
+    category == "Battery" -> when(size) {
+        "2 × 1" -> BatteryWideReceiver::class.java
+        "1 × 2" -> BatteryTallReceiver::class.java
+        "4 × 2" -> BatteryLargeReceiver::class.java
+        "1 × 1" -> BatterySmallReceiver::class.java
+        else -> BatteryReceiver::class.java
+    }
     category == "Digital Clock" && style == 34 -> ClockWidgetReceiver::class.java
     category == "Contacts" && style == 1 -> ContactReceiver::class.java
     category == "Contacts" && style == 11 -> CallReceiver::class.java

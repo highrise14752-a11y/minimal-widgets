@@ -27,6 +27,7 @@ fun configIntent(context: Context, id: Int, kind: WidgetKind) = Intent(context, 
     .putExtra("widgetId", id).putExtra("kind", kind.name)
 
 open class ExtraWidget(private val kind: WidgetKind) : GlanceAppWidget() {
+    override val sizeMode = androidx.glance.appwidget.SizeMode.Exact
     override val stateDefinition = androidx.glance.state.PreferencesGlanceStateDefinition
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val initialAppearance = AccentStore(context).appearance.first()

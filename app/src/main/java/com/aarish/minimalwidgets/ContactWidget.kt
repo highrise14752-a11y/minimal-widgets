@@ -53,6 +53,7 @@ private fun contactTapIntent(context: Context, id: Int, message: Boolean) =
     Intent(context, ContactActionActivity::class.java).putExtra("widgetId", id).putExtra("message", message)
 
 open class ContactWidget(private val mode: String = "both") : GlanceAppWidget() {
+    override val sizeMode = androidx.glance.appwidget.SizeMode.Exact
     override val stateDefinition = androidx.glance.state.PreferencesGlanceStateDefinition
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val initial = AccentStore(context).appearance.first()
@@ -101,6 +102,7 @@ suspend fun refreshContactWidgets(context: Context) {
 }
 
 class MusicWidget : GlanceAppWidget() {
+    override val sizeMode = androidx.glance.appwidget.SizeMode.Exact
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val initial = AccentStore(context).appearance.first()
         provideContent {

@@ -86,6 +86,7 @@ fun nextRingerMode(control: QuickControl, current: Int): Int = when(control) {
 }
 
 class QuickSettingsWidget : GlanceAppWidget() {
+    override val sizeMode = androidx.glance.appwidget.SizeMode.Exact
     override val stateDefinition = androidx.glance.state.PreferencesGlanceStateDefinition
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val widgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)

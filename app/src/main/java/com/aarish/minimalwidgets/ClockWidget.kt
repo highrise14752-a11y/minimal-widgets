@@ -12,6 +12,7 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
+import androidx.glance.layout.fillMaxSize
 import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
@@ -21,12 +22,13 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.flow.first
 
 class ClockWidget : GlanceAppWidget() {
+    override val sizeMode = androidx.glance.appwidget.SizeMode.Exact
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val initialAppearance = AccentStore(context).appearance.first()
         provideContent {
             val appearance by AccentStore(context).appearance.collectAsState(initial = initialAppearance)
             val views = RemoteViews(context.packageName, R.layout.widget_clock).apply { setTextColor(R.id.time, appearance.accent); setTextColor(R.id.date, appearance.textColor()); setInt(R.id.widget_root, "setBackgroundColor", appearance.background) }
-            AndroidRemoteViews(views, modifier = GlanceModifier.clickable(actionStartActivity(widgetDestination(context, "clock"))))
+            AndroidRemoteViews(views, modifier = GlanceModifier.fillMaxSize().clickable(actionStartActivity(widgetDestination(context, "clock"))))
         }
     }
 }
