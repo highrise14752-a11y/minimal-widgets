@@ -20,7 +20,7 @@
       </intent-filter>
     </activity>
     <receiver android:name=".BatteryPinReceiver" android:exported="false" />
-    <receiver android:name=".BatteryReceiver" android:exported="true" android:label="Battery">
+    <receiver android:name=".BatteryReceiver" android:exported="true" android:label="Battery 2 × 2">
       <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
       <meta-data android:name="android.appwidget.provider" android:resource="@xml/battery_widget_info" />
     </receiver>
@@ -91,6 +91,22 @@
         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
       </intent-filter>
       <meta-data android:name="android.appwidget.provider" android:resource="@xml/note_widget_info" />
+    </receiver>
+    <receiver android:name=".BatteryWideReceiver" android:exported="true" android:label="Battery 2 × 1">
+      <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/battery_wide_widget_info" />
+    </receiver>
+    <receiver android:name=".BatteryTallReceiver" android:exported="true" android:label="Battery 1 × 2">
+      <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/battery_tall_widget_info" />
+    </receiver>
+    <receiver android:name=".BatteryLargeReceiver" android:exported="true" android:label="Battery 4 × 2">
+      <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/battery_large_widget_info" />
+    </receiver>
+    <receiver android:name=".BatterySmallReceiver" android:exported="true" android:label="Battery 1 × 1">
+      <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/battery_small_widget_info" />
     </receiver>
   </application>
 </manifest>
