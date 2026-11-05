@@ -37,3 +37,9 @@ bash ./gradlew :app:connectedDebugAndroidTest
 
 On Windows use `gradlew.bat`. See [BUILDING.md](BUILDING.md) for device checks and current limitations. GitHub Actions builds and lints the app, then separately boots an Android 10 emulator, runs instrumentation tests and uploads test reports/screenshots. Check the current branch's Actions result before assuming those device checks passed.
 
+
+### Widget sizing fix (0.2.1)
+
+Ready cards now select providers matching their labelled cell size. Battery has separate 1x1, 1x2, 2x1, 2x2 and 4x2 providers. Photo and folder default to 2x2, clock and text to 2x1, and compact controls/contacts/music button to 1x1. Android 12+ receives explicit targetCellWidth/targetCellHeight; older launchers use dp fallbacks. Actual grid placement remains launcher-dependent. All live Glance layouts now use SizeMode.Exact; battery renders at the allocated aspect ratio and the clock text scales within its host.
+
+After updating, remove and re-add affected widgets. Android launchers retain the existing placed cell spans; an app cannot force-resize a widget already on the home screen. Existing battery selections remain saved until removal. Long-press and resize if a launcher uses a different grid. Preview categories are unchanged pending the user's sizing acceptance.
