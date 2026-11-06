@@ -27,6 +27,22 @@ class ContactDesignTest {
         assertNull(contactDestination(tile,"unknown"))
         assertEquals(4,contactSlotCount(3));assertEquals(8,contactSlotCount(4))
     }
+    @Test fun configuredTapsBypassMinimalWidgetsAndPermissionGrantsDoNotCall() {
+        val id=710003;val prefs=widgetPrefs(context)
+        try {
+            prefs.edit().putString(contactField("number",id,0),"+919876543210").commit()
+            val direct=contactTapDestination(context,id,0,"call",phoneAllowed=true)
+            assertEquals(Intent.ACTION_CALL,direct.action)
+            assertEquals("tel:+919876543210",direct.dataString)
+            assertNull(direct.component)
+            val permission=contactTapDestination(context,id,0,"call",phoneAllowed=false)
+            assertEquals(ContactActionActivity::class.java.name,permission.component?.className)
+            assertNotEquals(Intent.ACTION_CALL,permission.action)
+            val message=contactTapDestination(context,id,0,"message",phoneAllowed=false)
+            assertEquals(Intent.ACTION_SENDTO,message.action);assertNull(message.component)
+            assertEquals(ContactConfigActivity::class.java.name,contactTapDestination(context,id,1,"call",true).component?.className)
+        }finally{prefs.edit().remove(contactField("number",id,0)).commit()}
+    }
     @Test fun everyLayoutInflatesWithRealClickableRegionsAtSmallAndLargeSizes() {
         val designs=designCatalog.filter{it.category=="Contacts"}
         assertEquals(14,designs.size)
@@ -67,6 +83,20 @@ class ContactDesignTest {
                 edit.remove("contact-design-$id");repeat(8){slot->for(kind in listOf("name","number","telegram"))edit.remove(contactField(kind,id,slot))}}
             edit.commit()
         }
+    }
+    @Test fun savedContactPhotoReplacesTheDrawnAvatar() {
+        val id=710004
+        val photo=Bitmap.createBitmap(64,64,Bitmap.Config.ARGB_8888).apply{eraseColor(Color.RED)}
+        try {
+            contactPhoto(context,id,0).outputStream().use{photo.compress(Bitmap.CompressFormat.PNG,100,it)}
+            val saved=savedContact(context,id,0)
+            assertNotNull(saved.photo)
+            val portrait=ContactRenderer.render(1,Appearance(),listOf(saved),200,200)
+            assertEquals(Color.RED,portrait.getPixel(100,75));portrait.recycle()
+            val group=ContactRenderer.render(3,Appearance(),listOf(saved,ContactTile(),ContactTile(),ContactTile()),200,200)
+            assertEquals(Color.RED,group.getPixel(50,50));group.recycle()
+            saved.photo?.recycle()
+        }finally{photo.recycle();contactPhoto(context,id,0).delete()}
     }
     @Test fun allContactDesignsAreDistinctAndExportForReview() {
         val sheet=Bitmap.createBitmap(1400,780,Bitmap.Config.ARGB_8888)
