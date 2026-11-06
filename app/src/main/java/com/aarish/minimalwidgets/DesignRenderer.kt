@@ -6,7 +6,7 @@ import kotlin.math.*
 /** Original, code-drawn previews. No artwork or fonts are extracted from the reference app. */
 object DesignRenderer {
     fun render(d: Design, a: Appearance, level: Int = 60, charging: Boolean = true): Bitmap {
-        if(d.category=="Battery" && d.style==8) return BatteryRenderer.render(d,a,level,charging,140f,110f)
+        if(d.category=="Battery") return BatteryRenderer.render(d,a,level,charging,140f,110f)
         val bitmap = Bitmap.createBitmap(280, 220, Bitmap.Config.ARGB_8888)
         val c = Canvas(bitmap)
         val p = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -41,24 +41,6 @@ object DesignRenderer {
         rect(20f,10f,240f,200f,a.background,28f)
         val n=d.style
         when(d.category) {
-            "Battery" -> {
-                val f=(level/100f).coerceIn(0f,1f)
-                val percentText=if(level<0)"—" else "$level%"
-                when(n) {
-                    1 -> { ring(140f,100f,63f,f);text(percentText,140f,114f,38f);text("Battery level",140f,193f,13f,fg,false) }
-                    2 -> { text("Power",140f,46f,17f,fg,false);text(percentText,140f,112f,62f,a.accent);bar(45f,151f,190f,32f,f) }
-                    3 -> { text(if(charging)"charging" else "battery",140f,39f,17f);text(percentText,140f,65f,23f,a.accent);ring(140f,146f,61f,f);dot(119f,132f,6f,a.accent);dot(161f,132f,6f,a.accent);p.color=a.accent;p.style=Paint.Style.STROKE;p.strokeWidth=8f;c.drawArc(113f,135f,167f,178f,15f,150f,false,p);p.style=Paint.Style.FILL }
-                    4 -> {ring(80f,110f,36f,f);text(percentText,176f,119f,39f);text("BATTERY",176f,142f,12f,a.secondary)}
-                    5,9 -> {text(percentText,140f,67f,40f);bar(40f,100f,200f,78f,f)}
-                    6,16,17,19 -> { if(n==17)text(percentText,140f,48f,26f); dots(if(n==6)5 else 10,if(n==6)5 else 8,40f,if(n==17)65f else 30f,200f,if(n==17)125f else 160f,f,if(n==19)fg else a.accent) }
-                    7 -> {text(percentText,140f,57f,40f,a.accent);text("♥",140f,176f,110f,a.accent)}
-                    8 -> {rect(118f,15f,44f,15f,a.accent);rect(95f,25f,90f,175f,a.secondary);rect(95f,200f-175*f,90f,175*f,a.accent)}
-                    10,12 -> {text("ϟ",140f,48f,38f,a.accent);text(percentText,140f,83f,28f);repeat(5){i->rect(48f+i*38,110f,28f,75f,if(i<5*f)a.accent else a.accentDim(),8f)}}
-                    11 -> {text(percentText,140f,85f,34f);text("Battery",140f,115f,22f,fg,false);bar(45f,145f,190f,7f,f)}
-                    13,14,15 -> {bar(if(n==13)224f else 40f,30f,12f,160f,f);text("BATTERY",142f,58f,23f);text(percentText,145f,167f,58f)}
-                    else -> {text("ϟ",140f,60f,40f,a.accent);text(percentText,140f,135f,64f);dots(6,1,42f,160f,196f,25f,f)}
-                }
-            }
             "Digital Clock" -> {
                 val family=when(n%5){0->"sans-serif-condensed";1->"monospace";2->"serif";3->"sans-serif-light";else->"sans-serif-black"}
                 if(n==33) {text("12",140f,96f,69f);text("36",140f,169f,69f)}
