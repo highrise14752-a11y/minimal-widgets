@@ -62,7 +62,7 @@ object ContactRenderer {
             when(kind){
                 "call"->phone()
                 "telegram"->{p.style=Paint.Style.STROKE;p.strokeWidth=2f;p.strokeJoin=Paint.Join.ROUND;c.drawPath(Path().apply{moveTo(1f,9f);lineTo(23f,1f);lineTo(18f,23f);lineTo(10f,17f);lineTo(7f,21f);lineTo(7f,14f);lineTo(18f,6f);lineTo(7f,14f);close()},p)}
-                "whatsapp"->{bubble();p.color=a.background;c.save();c.translate(6f,4f);c.scale(.55f,.55f);phone();c.restore()}
+                "whatsapp"->{c.drawOval(1f,1f,23f,21f,p);c.drawPath(Path().apply{moveTo(3f,16f);lineTo(0f,24f);lineTo(10f,20f);close()},p);p.color=a.background;c.save();c.translate(6f,4f);c.scale(.55f,.55f);phone();c.restore()}
                 else->bubble()
             };p.style=Paint.Style.FILL;c.restore()
         }
@@ -82,7 +82,7 @@ object ContactRenderer {
                 }
             }
             3,4->{
-                val cols=if(style==4 && w>h*1.35f)4 else 2
+                val cols=contactColumns(style,bitmap.width,bitmap.height)
                 val rows=if(style==4)8/cols else 2
                 val cw=w/cols;val ch=h/rows;val diameter=min(cw,ch)*.76f
                 repeat(contactSlotCount(style)){i->val cx=(i%cols+.5f)*cw;val cy=(i/cols+.5f)*ch

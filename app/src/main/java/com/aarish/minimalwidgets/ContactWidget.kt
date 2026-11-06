@@ -32,6 +32,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import kotlinx.coroutines.flow.first
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 /** Accept telephone numbers, never post-dial instructions, USSD codes, or arbitrary URIs. */
 fun contactNumber(raw: String): String? = raw.filterNot { it in " -()." }
@@ -112,8 +114,12 @@ class PlayPauseMusic : androidx.glance.appwidget.action.ActionCallback {
 /** Launched only by a widget tap. Configuration and permission grants never place a call. */
 class ContactActionActivity : ComponentActivity() {
     private val permission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        AccentRefreshWorker.enqueue(this)
         Toast.makeText(this, if(granted) "Phone permission granted. Tap the home-screen contact again to call." else "Phone permission is required for direct calling.", Toast.LENGTH_LONG).show()
-        finish()
+        lifecycleScope.launch {
+            try{refreshContactWidgets(applicationContext)}catch(cancelled:kotlinx.coroutines.CancellationException){throw cancelled}catch(_:Exception){}
+            finish()
+        }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

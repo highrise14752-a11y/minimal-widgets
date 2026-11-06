@@ -23,6 +23,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import java.io.File
 import java.util.UUID
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -35,34 +37,58 @@ class ContactConfigActivity:ComponentActivity() {
     private var inputs by mutableStateOf(List(8){ContactInput()})
     private var error by mutableStateOf<String?>(null)
     private var allowed by mutableStateOf(false)
+    private var saving by mutableStateOf(false)
     private var photoRevision by mutableIntStateOf(0)
     private var token=UUID.randomUUID().toString()
     private var pickerSlot=0
+    private var pendingContactPhoto:Uri?=null
     private val drafts=mutableSetOf<Int>()
     private val removed=mutableSetOf<Int>()
     private fun draft(index:Int)=File(filesDir,"contact-draft-$token-$index.jpg")
     private fun change(index:Int,transform:(ContactInput)->ContactInput){inputs=inputs.mapIndexed{i,entry->if(i==index)transform(entry)else entry}}
-    private val permission=registerForActivityResult(ActivityResultContracts.RequestPermission()){allowed=it}
+    private val permission=registerForActivityResult(ActivityResultContracts.RequestPermission()){allowed=it;AccentRefreshWorker.enqueue(this)}
+    private val contactPhotoPermission=registerForActivityResult(ActivityResultContracts.RequestPermission()){granted->
+        if(granted)pendingContactPhoto?.let{uri->try{importPhoto(uri,pickerSlot)}catch(_:Exception){error="Could not read this contact photo. Choose a photo manually."}}
+        else error="Contact photo access was denied. You can choose a photo manually."
+    }
+    private fun importPhoto(uri:Uri,index:Int){
+        require(uri.scheme=="content")
+        val bounds=BitmapFactory.Options().apply{inJustDecodeBounds=true}
+        contentResolver.openInputStream(uri)?.use{BitmapFactory.decodeStream(it,null,bounds)}
+        require(bounds.outWidth>0 && bounds.outHeight>0)
+        val options=BitmapFactory.Options();var sample=1
+        while(bounds.outWidth/sample>512 || bounds.outHeight/sample>512)sample*=2
+        options.inSampleSize=sample
+        val bitmap=contentResolver.openInputStream(uri)?.use{BitmapFactory.decodeStream(it,null,options)}?:kotlin.error("Invalid image")
+        try{draft(index).outputStream().use{bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG,90,it)}}finally{bitmap.recycle()}
+        drafts.add(index);removed.remove(index);photoRevision++
+    }
     private val contactPicker=registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result->
         val uri=result.data?.data
         if(result.resultCode==RESULT_OK && uri!=null)try {
-            contentResolver.query(uri,arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,ContactsContract.CommonDataKinds.Phone.NUMBER),null,null,null)?.use { cursor->
-                if(cursor.moveToFirst())change(pickerSlot){it.copy(name=cursor.getString(0).orEmpty().take(60),number=cursor.getString(1).orEmpty().take(40))}
+            var photo:Uri?=null
+            val projection=arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,ContactsContract.CommonDataKinds.Phone.NUMBER,
+                ContactsContract.CommonDataKinds.Phone.PHOTO_URI,ContactsContract.CommonDataKinds.Phone.PHOTO_THUMBNAIL_URI)
+            contentResolver.query(uri,projection,null,null,null)?.use{cursor->
+                if(cursor.moveToFirst()){
+                    change(pickerSlot){it.copy(name=cursor.getString(0).orEmpty().take(60),number=cursor.getString(1).orEmpty().take(40))}
+                    photo=(cursor.getString(2)?:cursor.getString(3))?.let(Uri::parse)?.takeIf{it.scheme=="content"}
+                }
+            }
+            // A different person must never retain the previous person's avatar.
+            drafts.remove(pickerSlot);draft(pickerSlot).delete();removed.add(pickerSlot);photoRevision++
+            pendingContactPhoto=photo
+            photo?.let{picked->
+                try{importPhoto(picked,pickerSlot)}
+                catch(_:SecurityException){
+                    if(checkSelfPermission(Manifest.permission.READ_CONTACTS)!=PackageManager.PERMISSION_GRANTED)contactPhotoPermission.launch(Manifest.permission.READ_CONTACTS)
+                    else error="Could not load this contact photo. Choose a photo manually."
+                }catch(_:Exception){error="Could not load this contact photo. Choose a photo manually."}
             }
         }catch(_:Exception){error="Could not read that contact. Enter the number instead."}
     }
     private val photoPicker=registerForActivityResult(ActivityResultContracts.OpenDocument()){uri->
-        if(uri!=null)try {
-            val bounds=BitmapFactory.Options().apply{inJustDecodeBounds=true}
-            contentResolver.openInputStream(uri)?.use{BitmapFactory.decodeStream(it,null,bounds)}
-            require(bounds.outWidth>0 && bounds.outHeight>0)
-            val options=BitmapFactory.Options();var sample=1
-            while(bounds.outWidth/sample>512 || bounds.outHeight/sample>512)sample*=2
-            options.inSampleSize=sample
-            val bitmap=contentResolver.openInputStream(uri)?.use{BitmapFactory.decodeStream(it,null,options)}?:error("Invalid image")
-            try {draft(pickerSlot).outputStream().use{bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG,90,it)}} finally {bitmap.recycle()}
-            drafts.add(pickerSlot);removed.remove(pickerSlot);photoRevision++
-        }catch(_:Exception){error="Could not load that image. Choose another photo."}
+        if(uri!=null)try{importPhoto(uri,pickerSlot)}catch(_:Exception){error="Could not load that image. Choose another photo."}
     }
     override fun onResume(){super.onResume();allowed=checkSelfPermission(Manifest.permission.CALL_PHONE)==PackageManager.PERMISSION_GRANTED}
     override fun onCreate(savedInstanceState:Bundle?){
@@ -75,6 +101,7 @@ class ContactConfigActivity:ComponentActivity() {
         slot=(savedInstanceState?.getInt("slot")?:intent.getIntExtra("slot",0)).coerceIn(0,contactSlotCount(style)-1)
         token=savedInstanceState?.getString("token")?:token
         pickerSlot=savedInstanceState?.getInt("pickerSlot")?:slot
+        pendingContactPhoto=savedInstanceState?.getString("pendingContactPhoto")?.let(Uri::parse)
         drafts.addAll(savedInstanceState?.getIntArray("drafts")?.toList().orEmpty())
         removed.addAll(savedInstanceState?.getIntArray("removed")?.toList().orEmpty())
         val prefs=widgetPrefs(this)
@@ -117,10 +144,11 @@ class ContactConfigActivity:ComponentActivity() {
                     Button(onClick={permission.launch(Manifest.permission.CALL_PHONE)}){Text("Allow direct calls")}
                     TextButton(onClick={startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.fromParts("package",packageName,null)))}){Text("App permissions")}
                 }
+                Text("Picking a contact imports its saved photo automatically. Android may ask for Contacts permission to read that photo; a manual photo remains optional.")
                 Text("1x1 supported. Enlarge the home-screen widget for the full photo, group or button layout. Use the small menu on the widget to edit it again.")
                 error?.let{Text(it,color=MaterialTheme.colorScheme.error)}
-                Button(onClick={save()}){Text("Save contacts")}
-                TextButton(onClick={finish()}){Text("Cancel")}
+                Button(enabled=!saving,onClick={save()}){Text(if(saving)"Saving..."else"Save contacts")}
+                TextButton(enabled=!saving,onClick={finish()}){Text("Cancel")}
             }
         }}}
     }
@@ -133,6 +161,7 @@ class ContactConfigActivity:ComponentActivity() {
             if(relevant.none{numberCheck(it.number)!=null}){error="Set at least one valid phone number.";return}
             if(relevant.any{it.number.isNotBlank() && numberCheck(it.number)==null}){error="Check each phone number; include the country code for WhatsApp.";return}
         }
+        saving=true
         try {
             // Finish copies before saving references; configuration never launches a contact action.
             repeat(count){i->if(i in drafts)draft(i).copyTo(contactPhoto(this,widgetId,i),overwrite=true)}
@@ -142,11 +171,16 @@ class ContactConfigActivity:ComponentActivity() {
                 .putString(contactField("telegram",widgetId,i),telegramUsername(entry.telegram).orEmpty())}
             edit.apply()
             removed.forEach{contactPhoto(this,widgetId,it).delete()}
-            AccentRefreshWorker.enqueue(this);finish()
-        }catch(_:Exception){error="Could not save contacts. Please try again."}
+            AccentRefreshWorker.enqueue(this)
+            lifecycleScope.launch {
+                try{refreshContactWidgets(applicationContext)}catch(cancelled:kotlinx.coroutines.CancellationException){throw cancelled}catch(_:Exception){}
+                finish()
+            }
+        }catch(_:Exception){saving=false;error="Could not save contacts. Please try again."}
     }
     override fun onSaveInstanceState(outState:Bundle){
         super.onSaveInstanceState(outState)
+        outState.putString("pendingContactPhoto",pendingContactPhoto?.toString())
         outState.putInt("style",style);outState.putInt("slot",slot);outState.putInt("pickerSlot",pickerSlot);outState.putString("token",token)
         outState.putIntArray("drafts",drafts.toIntArray());outState.putIntArray("removed",removed.toIntArray())
         outState.putString("entries",JSONArray().apply{inputs.forEach{put(JSONObject().put("name",it.name).put("number",it.number).put("telegram",it.telegram))}}.toString())
