@@ -15,11 +15,17 @@ import java.io.File
 @RunWith(AndroidJUnit4::class)
 class ContactDesignTest {
     private val context get()=InstrumentationRegistry.getInstrumentation().targetContext
+    @Test fun noAddressBookPermissionIsRequested() {
+        val permissions=context.packageManager.getPackageInfo(context.packageName,android.content.pm.PackageManager.GET_PERMISSIONS).requestedPermissions.orEmpty()
+        assertFalse(android.Manifest.permission.READ_CONTACTS in permissions)
+    }
     @Test fun routesUseConfiguredContactAndRejectInjectedLinks() {
         val tile=ContactTile("Name","+919876543210",telegram="example_user")
         assertEquals(Intent.ACTION_CALL,contactDestination(tile,"call")?.action)
-        assertEquals("tel:+919876543210",contactDestination(tile,"call")?.dataString)
-        assertEquals("smsto:+919876543210",contactDestination(tile,"message")?.dataString)
+        assertEquals("tel",contactDestination(tile,"call")?.data?.scheme)
+        assertEquals("+919876543210",contactDestination(tile,"call")?.data?.schemeSpecificPart)
+        assertEquals("smsto",contactDestination(tile,"message")?.data?.scheme)
+        assertEquals("+919876543210",contactDestination(tile,"message")?.data?.schemeSpecificPart)
         assertEquals("https://t.me/example_user",contactDestination(tile,"telegram")?.dataString)
         assertEquals("https://wa.me/919876543210",contactDestination(tile,"whatsapp")?.dataString)
         for(raw in listOf("https://t.me/user","user?start=test","user/name","login","*123#"))assertNull(telegramUsername(raw))
@@ -33,7 +39,8 @@ class ContactDesignTest {
             prefs.edit().putString(contactField("number",id,0),"+919876543210").commit()
             val direct=contactTapDestination(context,id,0,"call",phoneAllowed=true)
             assertEquals(Intent.ACTION_CALL,direct.action)
-            assertEquals("tel:+919876543210",direct.dataString)
+            assertEquals("tel",direct.data?.scheme)
+            assertEquals("+919876543210",direct.data?.schemeSpecificPart)
             assertNull(direct.component)
             val permission=contactTapDestination(context,id,0,"call",phoneAllowed=false)
             assertEquals(ContactActionActivity::class.java.name,permission.component?.className)
