@@ -13,6 +13,29 @@ object BatteryRenderer {
         val c=Canvas(output)
         val p=Paint(Paint.ANTI_ALIAS_FLAG)
         val fw=w.toFloat(); val fh=h.toFloat(); val unit=min(fw,fh)
+        if(d.style==8) {
+            // Paint only the battery so wallpaper is visible around its silhouette.
+            val bodyHeight=min(fh*.84f,fw*.78f*2.1f)
+            val bodyWidth=bodyHeight/2.1f
+            val capHeight=bodyHeight*.06f
+            val left=(fw-bodyWidth)/2f
+            val top=(fh-bodyHeight-capHeight)/2f+capHeight
+            val body=RectF(left,top,left+bodyWidth,top+bodyHeight)
+            val radius=bodyWidth*.24f
+            p.color=a.accent
+            c.drawRoundRect(fw/2-bodyWidth*.2f,top-capHeight,fw/2+bodyWidth*.2f,top+capHeight,capHeight,capHeight,p)
+            p.color=a.background
+            c.drawRoundRect(body,radius,radius,p)
+            val fraction=(level/100f).coerceIn(0f,1f)
+            if(fraction>0f) {
+                c.save()
+                c.clipRect(body.left,body.bottom-body.height()*fraction,body.right,body.bottom)
+                p.color=a.accent
+                c.drawRoundRect(body,radius,radius,p)
+                c.restore()
+            }
+            return output
+        }
         p.color=a.background
         c.drawRoundRect(0f,0f,fw,fh,unit*.12f,unit*.12f,p)
         val f=(level/100f).coerceIn(0f,1f)
@@ -47,11 +70,6 @@ object BatteryRenderer {
                     bar(fw*.1f,fh*.79f,fw*.8f,fh*.055f)
                 }
             }
-        } else if(fh>fw*1.35f && d.style==8) {
-            p.color=a.secondary;c.drawRoundRect(fw*.2f,fh*.12f,fw*.8f,fh*.9f,fw*.12f,fw*.12f,p)
-            c.save();c.clipRect(fw*.2f,fh*.9f-fh*.78f*f,fw*.8f,fh*.9f)
-            p.color=a.accent;c.drawRoundRect(fw*.2f,fh*.12f,fw*.8f,fh*.9f,fw*.12f,fw*.12f,p);c.restore()
-            text(label,fw*.5f,fh*.55f,unit*.25f)
         } else {
             val preview=DesignRenderer.render(d,a,level,charging)
             val scale=min(fw/240f,fh/200f)

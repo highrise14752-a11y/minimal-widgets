@@ -6,6 +6,7 @@ import kotlin.math.*
 /** Original, code-drawn previews. No artwork or fonts are extracted from the reference app. */
 object DesignRenderer {
     fun render(d: Design, a: Appearance, level: Int = 60, charging: Boolean = true): Bitmap {
+        if(d.category=="Battery" && d.style==8) return BatteryRenderer.render(d,a,level,charging,140f,110f)
         val bitmap = Bitmap.createBitmap(280, 220, Bitmap.Config.ARGB_8888)
         val c = Canvas(bitmap)
         val p = Paint(Paint.ANTI_ALIAS_FLAG)
