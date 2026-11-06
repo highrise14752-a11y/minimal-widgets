@@ -110,7 +110,7 @@ object BatteryRenderer {
                     p.color=color;p.style=Paint.Style.STROKE;p.strokeWidth=11f;p.strokeCap=Paint.Cap.ROUND
                     c.drawCircle(cx,cy,radius,p)
                     c.drawArc(cx-30,cy-5,cx+30,cy+33,12f,156f,false,p)
-                    p.style=Paint.Style.FILL;c.drawCircle(cx-23,cy-10,7f,p);c.drawCircle(cx+23,cy-10,7f,p)
+                    p.style=Paint.Style.FILL;c.drawCircle(cx-23,cy,7f,p);c.drawCircle(cx+23,cy,7f,p)
                 }
                 c.save();c.clipRect(0f,0f,200f,200f);face(a.accentDim())
                 c.clipRect(0f,cy+radius-2*radius*f,200f,cy+radius);face(a.accent);c.restore()
@@ -186,7 +186,7 @@ object BatteryRenderer {
                 bolt(19f,19f,25f)
                 text(percent,19f,144f,49f,align=Paint.Align.LEFT,italic=true,maxWidth=139f)
                 text(status,20f,164f,14f,bold=false,align=Paint.Align.LEFT,maxWidth=137f)
-                text(timeLabel(level,charging,remainingMillis),20f,184f,10f,bold=false,align=Paint.Align.LEFT,maxWidth=138f)
+                if(charging && remainingMillis!=null && remainingMillis>0)text(timeLabel(level,charging,remainingMillis),20f,184f,10f,bold=false,align=Paint.Align.LEFT,maxWidth=138f)
                 vertical(169f,18f,10f,166f)
             }
             14,15 -> {

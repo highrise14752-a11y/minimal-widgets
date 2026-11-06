@@ -6,6 +6,7 @@ import kotlin.math.*
 /** Original, code-drawn previews. No artwork or fonts are extracted from the reference app. */
 object DesignRenderer {
     fun render(d: Design, a: Appearance, level: Int = 60, charging: Boolean = true): Bitmap {
+        if(d.category=="Contacts") return ContactRenderer.preview(d,a)
         if(d.category=="Battery") return BatteryRenderer.render(d,a,level,charging,140f,110f)
         val bitmap = Bitmap.createBitmap(280, 220, Bitmap.Config.ARGB_8888)
         val c = Canvas(bitmap)
@@ -62,11 +63,6 @@ object DesignRenderer {
                 val cols=when(n){1->2;2->3;3->7;4->4;else->4};val rows=when(n){1->2;4->1;else->3}
                 val h=if(n==4)54f else 165f; val y=if(n==4)82f else 28f
                 repeat(rows){r->repeat(cols){col->rect(36f+col*208f/cols,y+r*h/rows,208f/cols-9,h/rows-9,a.secondary,12f)}}
-            }
-            "Contacts" -> when(n) {
-                1,2,5,6 -> {avatar(140f,87f,65f,n);text("Arsh",140f,181f,28f);if(n!=1){text("☎",60f,52f,24f,a.accent);text("●",220f,52f,22f,a.accent)}}
-                3,4 -> {repeat(if(n==4)8 else 4){i->val cols=if(n==4)4 else 2;avatar(52f+(i%cols)*176f/(cols-1),62f+(i/cols)*94,if(n==4)22f else 35f,i)}}
-                else -> {text(if(n>=11)"Samira" else "YOUR NAME",140f,95f,31f);rect(45f,138f,85f,47f,a.accent);rect(150f,138f,85f,47f,a.accent);text("☎",88f,172f,30f,Color.BLACK);text(if(n==13)"➤" else "●",192f,170f,30f,Color.BLACK)}
             }
             "Games" -> when(n) {
                 1 -> repeat(9){i->text(if(i%3==0)"O" else "×",72f+i%3*68,69f+i/3*62,57f,if(i%3==0)a.accent else fg)}

@@ -134,6 +134,11 @@ open class CleanWidgetReceiver : GlanceAppWidgetReceiver() {
         val prefs = widgetPrefs(context).edit()
         appWidgetIds.forEach { id ->
             File(context.filesDir, "photo-$id.jpg").delete()
+            repeat(8){slot->
+                contactPhoto(context,id,slot).delete()
+                prefs.remove(contactField("name",id,slot)).remove(contactField("number",id,slot)).remove(contactField("telegram",id,slot))
+            }
+            prefs.remove("contact-design-$id")
             prefs.remove("note-$id").remove("apps-$id")
                 .remove("contact-name-$id").remove("contact-number-$id")
         }
